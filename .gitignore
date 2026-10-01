@@ -1,0 +1,16 @@
+node_modules/
+frontend/node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+.env
+cloudflared.exe
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: growth-stock-analyser
+    env: python
+    buildCommand: "cd frontend && npm install && npm run build && cd .. && pip install -r backend/requirements.txt"
+    startCommand: "python -m uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DISCORD_WEBHOOK_URL
+        sync: false
