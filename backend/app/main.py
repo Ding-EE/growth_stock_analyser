@@ -13,6 +13,11 @@ async def lifespan(app: FastAPI):
     # Startup: Start background market close scheduler
     print("[Server Startup] Starting APScheduler for daily post-market screening...")
     start_scheduler()
+    
+    # Warm up screener cache asynchronously in a background thread to maximize Render performance
+    import threading
+    from .routers.screener import warmup_screener_cache
+    threading.Thread(target=warmup_screener_cache, daemon=True).start()
     yield
     # Shutdown: Graceful stop
     print("[Server Shutdown] Stopping APScheduler...")
