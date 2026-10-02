@@ -504,25 +504,42 @@ export const ScreenerModal: React.FC<ScreenerModalProps> = ({
                           </span>
                         </td>
 
-                        {/* News Sentiment with Tooltip (Addresses Zetrix sentiment) */}
+                        {/* News Sentiment with Tooltip (Live RSS Grounded) */}
                         <td className="py-3 px-3 text-center">
                           <div className="relative group inline-block">
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-sans font-semibold border cursor-help ${
-                              (row.sentimentScore || 0) <= -10
-                                ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-                                : (row.sentimentScore || 0) >= 20
-                                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                                : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                            }`}>
-                              {(row.sentimentScore || 0) <= -10 && <AlertCircle className="w-3 h-3 text-rose-400" />}
-                              <span>{row.sentimentLabel || 'Neutral'}</span>
-                            </span>
+                            {(() => {
+                              const sc = row.sentimentScore || 0;
+                              const isBearish = sc <= -15 || row.sentimentLabel?.toLowerCase().includes('caution') || row.sentimentLabel?.toLowerCase().includes('bearish');
+                              const isBullish = sc >= 15 || row.sentimentLabel?.toLowerCase().includes('bullish') || row.sentimentLabel?.toLowerCase().includes('positive');
+                              
+                              return (
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-sans font-semibold border cursor-help ${
+                                  isBearish
+                                    ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                                    : isBullish
+                                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                                    : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                                }`}>
+                                  {isBearish && <AlertCircle className="w-3 h-3 text-rose-400" />}
+                                  <span>{row.sentimentLabel || 'Neutral / Mixed'}</span>
+                                </span>
+                              );
+                            })()}
 
                             {/* Headline hover tooltip */}
                             {row.sentimentHeadline && (
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 w-64 p-2 bg-slate-950 border border-slate-700 rounded-lg text-[11px] font-sans text-slate-300 shadow-xl pointer-events-none">
-                                <div className="font-semibold text-white mb-0.5">Top Headline Context:</div>
-                                <div className="italic text-slate-400">"{row.sentimentHeadline}"</div>
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 w-72 p-2.5 bg-slate-950 border border-slate-700 rounded-lg text-[11px] font-sans text-slate-200 shadow-2xl pointer-events-none text-left">
+                                <div className="flex items-center justify-between font-semibold text-white mb-1 pb-1 border-b border-slate-800">
+                                  <span>Top Headline Context:</span>
+                                  {row.sentimentScore !== undefined && (
+                                    <span className={`font-mono text-[10px] ${
+                                      row.sentimentScore > 0 ? 'text-emerald-400' : row.sentimentScore < 0 ? 'text-rose-400' : 'text-slate-400'
+                                    }`}>
+                                      Score: {row.sentimentScore > 0 ? `+${row.sentimentScore}` : row.sentimentScore}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="italic text-slate-300 leading-snug">"{row.sentimentHeadline}"</div>
                               </div>
                             )}
                           </div>
