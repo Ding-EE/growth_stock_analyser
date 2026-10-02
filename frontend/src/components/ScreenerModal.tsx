@@ -15,6 +15,88 @@ import {
   HelpCircle
 } from 'lucide-react';
 
+// Authoritative company name lookup for Malaysia and US equities
+const COMPANY_NAME_MAP: Record<string, string> = {
+  // Bursa Malaysia Watchlist
+  '1155.KL': 'Malayan Banking Berhad (Maybank)',
+  '1023.KL': 'CIMB Group Holdings Berhad',
+  '1295.KL': 'Public Bank Berhad',
+  '1066.KL': 'RHB Bank Berhad',
+  '1015.KL': 'AMMB Holdings Berhad (AmBank)',
+  '5819.KL': 'Hong Leong Bank Berhad',
+  '0166.KL': 'Inari Amertron Berhad',
+  '0097.KL': 'ViTrox Corporation Berhad',
+  '0128.KL': 'Frontken Corporation Berhad',
+  '0138.KL': 'Zetrix AI Berhad (MY E.G. Services)',
+  '0208.KL': 'Greatech Technology Berhad',
+  '5292.KL': 'UWC Berhad',
+  '7204.KL': 'D&O Green Technologies Berhad',
+  '5398.KL': 'Gamuda Berhad',
+  '8869.KL': 'Press Metal Aluminium Holdings',
+  '5211.KL': 'Sunway Berhad',
+  '7277.KL': 'Dialog Group Berhad',
+  '3816.KL': 'MISC Berhad',
+  '7084.KL': 'QL Resources Berhad',
+  '5296.KL': 'MR D.I.Y. Group (M) Berhad',
+  '4707.KL': 'Nestlé (Malaysia) Berhad',
+  '5306.KL': 'Farm Fresh Berhad',
+  '4197.KL': 'Sime Darby Berhad',
+  '2445.KL': 'Kuala Lumpur Kepong Berhad (KLK)',
+  '1961.KL': 'IOI Corporation Berhad',
+  '5225.KL': 'IHH Healthcare Berhad',
+  '5878.KL': 'KPJ Healthcare Berhad',
+  '5099.KL': 'Capital A Berhad (AirAsia)',
+  '5183.KL': 'Petronas Chemicals Group Berhad',
+  '6033.KL': 'Petronas Gas Berhad',
+  '5681.KL': 'Petronas Dagangan Berhad',
+  '5347.KL': 'Tenaga Nasional Berhad (TNB)',
+  '6742.KL': 'YTL Power International Berhad',
+  '6888.KL': 'Axiata Group Berhad',
+  '6947.KL': 'CelcomDigi Berhad',
+  '4863.KL': 'Telekom Malaysia Berhad',
+  '5168.KL': 'Hartalega Holdings Berhad',
+  '7113.KL': 'Top Glove Corporation Bhd',
+
+  // US Equities Watchlist Leaders
+  'AAPL': 'Apple Inc.',
+  'NVDA': 'NVIDIA Corporation',
+  'MSFT': 'Microsoft Corporation',
+  'AMZN': 'Amazon.com, Inc.',
+  'GOOGL': 'Alphabet Inc.',
+  'META': 'Meta Platforms, Inc.',
+  'TSLA': 'Tesla, Inc.',
+  'AVGO': 'Broadcom Inc.',
+  'PLTR': 'Palantir Technologies Inc.',
+  'AMD': 'Advanced Micro Devices, Inc.',
+  'CRWD': 'CrowdStrike Holdings, Inc.',
+  'NOW': 'ServiceNow, Inc.',
+  'SNOW': 'Snowflake Inc.',
+  'NFLX': 'Netflix, Inc.',
+  'COST': 'Costco Wholesale Corporation',
+  'LLY': 'Eli Lilly and Company',
+  'JPM': 'JPMorgan Chase & Co.',
+  'V': 'Visa Inc.',
+  'UNH': 'UnitedHealth Group Incorporated',
+  'WMT': 'Walmart Inc.',
+  'QCOM': 'Qualcomm Incorporated',
+  'TXN': 'Texas Instruments Incorporated',
+  'UBER': 'Uber Technologies, Inc.',
+  'ABNB': 'Airbnb, Inc.',
+  'PANW': 'Palo Alto Networks, Inc.',
+  'SMCI': 'Super Micro Computer, Inc.',
+  'COIN': 'Coinbase Global, Inc.',
+  'ARM': 'Arm Holdings plc',
+  'ASML': 'ASML Holding N.V.',
+  'CRM': 'Salesforce, Inc.'
+};
+
+export const getDisplayName = (row: ScreenerItem): string => {
+  if (row.name && row.name !== row.ticker && row.name.toUpperCase() !== row.ticker.toUpperCase()) {
+    return row.name;
+  }
+  return COMPANY_NAME_MAP[row.ticker] || row.name || row.ticker;
+};
+
 interface ScreenerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,6 +105,7 @@ interface ScreenerModalProps {
 }
 
 type SortField = 
+  | 'name'
   | 'ticker' 
   | 'price' 
   | 'returnOnEquity' 
@@ -102,6 +185,12 @@ export const ScreenerModal: React.FC<ScreenerModalProps> = ({
     const items = [...data.results];
 
     items.sort((a, b) => {
+      if (sortField === 'name') {
+        const nameA = getDisplayName(a);
+        const nameB = getDisplayName(b);
+        return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+      }
+
       let valA: any = a[sortField as keyof ScreenerItem];
       let valB: any = b[sortField as keyof ScreenerItem];
 
@@ -357,8 +446,8 @@ export const ScreenerModal: React.FC<ScreenerModalProps> = ({
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 font-semibold select-none">
                     <tr>
-                      <th onClick={() => handleSort('ticker')} className="py-3 px-3 cursor-pointer hover:text-white transition-colors">
-                        Ticker {renderSortIcon('ticker')}
+                      <th onClick={() => handleSort('name')} className="py-3 px-3 cursor-pointer hover:text-white transition-colors min-w-[210px]">
+                        Company Name &amp; Ticker {renderSortIcon('name')}
                       </th>
                       <th className="py-3 px-2">Market</th>
                       <th onClick={() => handleSort('price')} className="py-3 px-3 text-right cursor-pointer hover:text-white transition-colors">
@@ -402,15 +491,24 @@ export const ScreenerModal: React.FC<ScreenerModalProps> = ({
                           row.qualifiesGrowth ? 'bg-emerald-950/15' : ''
                         }`}
                       >
-                        {/* Ticker & Name */}
-                        <td className="py-3 px-3">
-                          <div className="font-bold text-white flex items-center gap-1.5">
-                            <span>{row.ticker}</span>
-                            {row.isUptrend && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" title="Confirmed Uptrend"></span>
-                            )}
+                        {/* Company Name & Ticker */}
+                        <td className="py-3 px-3 min-w-[210px]">
+                          <div className="flex flex-col">
+                            <div className="font-bold text-white text-xs hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-sans">
+                              <span>{getDisplayName(row)}</span>
+                              {row.isUptrend && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block shrink-0" title="Confirmed Uptrend"></span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700/60">
+                                {row.ticker}
+                              </span>
+                              <span className="text-[10px] font-sans text-slate-400 truncate max-w-[130px]">
+                                {row.sector && row.sector !== 'N/A' && row.sector !== 'General' ? row.sector : (row.ticker.endsWith('.KL') ? 'Bursa Malaysia' : 'US Equities')}
+                              </span>
+                            </div>
                           </div>
-                          <div className="text-[10px] font-sans text-slate-400 truncate max-w-[125px]">{row.name}</div>
                         </td>
 
                         {/* Market */}

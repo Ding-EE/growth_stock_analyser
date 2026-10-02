@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query
 from typing import List, Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from ..config import settings
-from ..services.market_data import get_stock_quote, normalize_ticker
+from ..services.market_data import get_stock_quote, normalize_ticker, get_canonical_name
 from ..services.fundamentals import get_fundamental_metrics
 from ..services.technicals import calculate_technical_indicators
 from ..services.sentiment import analyze_stock_sentiment
@@ -39,7 +39,7 @@ def _process_screener_stock(ticker: str, min_rev_growth: float, min_eps_growth: 
         
         return {
             "ticker": norm_ticker,
-            "name": quote.get("name", norm_ticker),
+            "name": quote.get("name") or get_canonical_name(norm_ticker),
             "market": quote.get("market"),
             "currency": quote.get("currency"),
             "price": quote.get("currentPrice"),

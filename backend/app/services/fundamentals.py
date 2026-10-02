@@ -1,6 +1,6 @@
 from typing import Dict, Any, Optional
 import yfinance as yf
-from .market_data import get_ticker_object, normalize_ticker
+from .market_data import get_ticker_object, normalize_ticker, get_canonical_name
 
 def format_cash_flow(val: Optional[float], currency: str = "USD") -> str:
     if val is None:
@@ -117,7 +117,7 @@ def get_fundamental_metrics(ticker: str) -> Dict[str, Any]:
     
     return {
         "ticker": norm_ticker,
-        "name": info.get("shortName") or info.get("longName") or norm_ticker,
+        "name": get_canonical_name(norm_ticker, info),
         "sector": sector or "General",
         "industry": info.get("industry") or "General",
         "currency": currency,
